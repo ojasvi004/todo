@@ -18,6 +18,7 @@ const UserSchema: Schema<IUser> = new Schema(
         ref: "Todo",
       },
     ],
+    refreshToken: {type: String},
   },
   { timestamps: true }
 );
