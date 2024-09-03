@@ -1,11 +1,15 @@
 import express, { Express } from "express";
 import cors from "cors";
-import connectDB from "./db/index.js";
+import connectDB from "./db/index";
 import dotenv from "dotenv";
+import { router as authRouter } from "./routes/auth.route";
 dotenv.config();
 
 const app: Express = express();
 app.use(cors());
+app.use(express.json());
+
+app.use("/api/v1", authRouter);
 
 connectDB()
   .then(() => {
@@ -23,4 +27,3 @@ connectDB()
     console.log("mongoDB connection failed ", error);
     process.exit(1);
   });
-
