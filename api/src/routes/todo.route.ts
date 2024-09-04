@@ -5,12 +5,13 @@ import {
   deleteTodo,
   updateTodo,
 } from "../controllers/todo.controller";
+import { verifyToken } from "../middlewares/verifyToken";
 
 const router: Router = Router();
 
-router.get("/todo", showAllTodos);
-router.post("/todo", addTodo);
-router.delete("/todo/:id", deleteTodo);
-router.patch("/todo/:id", updateTodo);
+router.get("/todo", verifyToken, showAllTodos);
+router.post("/todo", verifyToken, addTodo);
+router.delete("/todo/:id", verifyToken, deleteTodo);
+router.patch("/todo/:id", verifyToken, updateTodo);
 
 export { router };
