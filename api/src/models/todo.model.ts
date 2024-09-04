@@ -15,9 +15,12 @@ const TodoSchema: Schema<ITodo> = new Schema(
       type: Boolean,
       default: false,
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   { timestamps: true }
 );
-
 
 export const Todo = mongoose.model<ITodo>("Todo", TodoSchema);
