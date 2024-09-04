@@ -5,7 +5,10 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 
-export const register = async (req: Request, res: Response) => {
+export const register = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
     const { username, password } = req.body;
     const checkUsername = await User.findOne({ username });
@@ -20,12 +23,12 @@ export const register = async (req: Request, res: Response) => {
       username,
       password: hashedPassword,
     });
-    res.status(201).json(user);
+    return res.status(201).json(user);
   } catch (error) {
-    res.status(500).json({ msg: error });
+    return res.status(500).json({ msg: error });
   }
 };
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
@@ -33,15 +36,17 @@ export const login = async (req: Request, res: Response) => {
       return res.status(404).json({ msg: "user not found" });
     }
     const isPasswordValid = bcrypt.compareSync(password, user.password);
-    if (!isPasswordValid)
+    if (!isPasswordValid) {
       return res.status(401).json({ msg: "invalid password" });
+    }
+
     const payload = { username, id: user._id };
 
     const accessToken = jwt.sign(
       payload,
       process.env.ACCESS_TOKEN_SECRET as string,
       {
-        expiresIn: process.env.ACCESS_TOKEN_EXPIRY, 
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
       }
     );
 
@@ -64,6 +69,6 @@ export const login = async (req: Request, res: Response) => {
 
     return res.status(200).json({ msg: "login successful" });
   } catch (error) {
-    res.status(500).json({ msg: error });
+    return res.status(500).json({ msg: error });
   }
 };
