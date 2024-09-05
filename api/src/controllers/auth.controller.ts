@@ -70,3 +70,12 @@ export const login = asyncHandler(
     return res.status(200).json({ msg: "login successful" });
   }
 );
+export const logout = asyncHandler(
+  async (req: Request, res: Response): Promise<Response> => {
+    return res
+      .cookie("access_token", "", { httpOnly: true })
+      .cookie("refresh_token", "", { httpOnly: true })
+      .status(200)
+      .json({ msg: "logout successful" });
+  }
+);
