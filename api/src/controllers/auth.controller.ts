@@ -1,5 +1,6 @@
 import { User } from "../models/user.model";
 import { asyncHandler } from "../utils/asyncHandler";
+import { ApiResponse } from "../utils/ApiResponse";
 import bcrypt from "bcryptjs";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
@@ -12,7 +13,9 @@ export const register = asyncHandler(
 
     const checkUsername = await User.findOne({ username });
     if (checkUsername) {
-      return res.status(409).json({ msg: "username already exists" });
+      return res
+        .status(409)
+        .json(new ApiResponse(409, null, "username already exists"));
     }
 
     const saltRounds = 10;
@@ -23,8 +26,9 @@ export const register = asyncHandler(
       username,
       password: hashedPassword,
     });
-
-    return res.status(201).json({ msg: user });
+    return res
+      .status(201)
+      .json(new ApiResponse(201, user, "registration successful"));
   }
 );
 
@@ -34,12 +38,14 @@ export const login = asyncHandler(
 
     const user = await User.findOne({ username });
     if (!user) {
-      return res.status(404).json({ msg: "user not found" });
+      return res.status(404).json(new ApiResponse(404, null, "user not found"));
     }
 
     const isPasswordValid = bcrypt.compareSync(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ msg: "invalid password" });
+      return res
+        .status(401)
+        .json(new ApiResponse(401, null, "invalid password"));
     }
 
     const payload = { username, id: user._id };
@@ -67,15 +73,18 @@ export const login = asyncHandler(
       .cookie("access_token", accessToken, { httpOnly: true })
       .cookie("refresh_token", refreshToken, { httpOnly: true });
 
-    return res.status(200).json({ msg: "login successful" });
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, "login successful"));
   }
 );
 export const logout = asyncHandler(
   async (req: Request, res: Response): Promise<Response> => {
-    return res
+    res
       .cookie("access_token", "", { httpOnly: true })
       .cookie("refresh_token", "", { httpOnly: true })
-      .status(200)
-      .json({ msg: "logout successful" });
+      .status(200);
+
+    return res.json(new ApiResponse(200, null, "logout successful"));
   }
 );
