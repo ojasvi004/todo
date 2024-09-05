@@ -5,7 +5,7 @@ import { registerValidation } from "../schemas/registration.schema";
 import { loginValidation } from "../schemas/login.schema";
 import bcrypt from "bcryptjs";
 import { Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import dotenv from "dotenv";
 import { z } from "zod";
 dotenv.config();
@@ -88,6 +88,62 @@ export const login = asyncHandler(
       .cookie("refresh_token", refreshToken, { httpOnly: true });
 
     return res.status(200).json(new ApiResponse(200, null, "login successful"));
+  }
+);
+
+export const refreshToken = asyncHandler(
+  async (req: Request, res: Response): Promise<Response> => {
+    const { refresh_token } = req.cookies;
+
+    if (!refresh_token) {
+      return res
+        .status(404)
+        .json(new ApiResponse(404, null, "refresh token doesn't exist"));
+    }
+    const token = jwt.verify(
+      refresh_token,
+      process.env.REFRESH_TOKEN_SECRET as string
+    ) as JwtPayload;
+    const user = await User.findOne({ username: token.username });
+
+    if (!user || user.refreshToken !== refresh_token) {
+      return res
+        .status(403)
+        .json(new ApiResponse(403, null, "invalid refresh token"));
+    }
+
+    const payload = { username: token.username, id: token.id };
+
+    const newAccessToken = jwt.sign(
+      payload,
+      process.env.ACCESS_TOKEN_SECRET as string,
+      {
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+      }
+    );
+
+    const newRefreshToken = jwt.sign(
+      payload,
+      process.env.REFRESH_TOKEN_SECRET as string,
+      {
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+      }
+    );
+
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    res
+      .cookie("access_token", newAccessToken, {
+        httpOnly: true,
+      })
+      .cookie("refresh_token", newRefreshToken, {
+        httpOnly: true,
+      });
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, "tokens refreshed successfully"));
   }
 );
 
