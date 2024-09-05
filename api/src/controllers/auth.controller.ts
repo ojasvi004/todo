@@ -1,14 +1,23 @@
 import { User } from "../models/user.model";
 import { asyncHandler } from "../utils/asyncHandler";
 import { ApiResponse } from "../utils/ApiResponse";
+import { registerValidation } from "../schemas/registration.schema";
+import { loginValidation } from "../schemas/login.schema";
 import bcrypt from "bcryptjs";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { z } from "zod";
 dotenv.config();
 
 export const register = asyncHandler(
   async (req: Request, res: Response): Promise<Response> => {
+    try {
+      registerValidation.parse(req.body);
+    } catch (error) {
+      return res.status(400).json(new ApiResponse(400, null, "invalid input"));
+    }
+
     const { username, password } = req.body;
 
     const checkUsername = await User.findOne({ username });
@@ -34,6 +43,11 @@ export const register = asyncHandler(
 
 export const login = asyncHandler(
   async (req: Request, res: Response): Promise<Response> => {
+    try {
+      loginValidation.parse(req.body);
+    } catch (error) {
+      return res.status(400).json(new ApiResponse(400, null, "invalid input"));
+    }
     const { username, password } = req.body;
 
     const user = await User.findOne({ username });
@@ -73,11 +87,10 @@ export const login = asyncHandler(
       .cookie("access_token", accessToken, { httpOnly: true })
       .cookie("refresh_token", refreshToken, { httpOnly: true });
 
-    return res
-      .status(200)
-      .json(new ApiResponse(200, null, "login successful"));
+    return res.status(200).json(new ApiResponse(200, null, "login successful"));
   }
 );
+
 export const logout = asyncHandler(
   async (req: Request, res: Response): Promise<Response> => {
     res
