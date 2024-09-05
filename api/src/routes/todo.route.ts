@@ -9,9 +9,7 @@ import { verifyToken } from "../middlewares/verifyToken";
 
 const router: Router = Router();
 
-router.get("/todo", verifyToken, showAllTodos);
-router.post("/todo", verifyToken, addTodo);
-router.delete("/todo/:id", verifyToken, deleteTodo);
-router.patch("/todo/:id", verifyToken, updateTodo);
+router.route('/todo').get(verifyToken, showAllTodos).post(verifyToken, addTodo);
+router.route('/todo/:id').delete(verifyToken, deleteTodo).patch(verifyToken, updateTodo);
 
 export { router };
