@@ -20,7 +20,7 @@ export const verifyToken = async (
 
   jwt.verify(
     token,
-    process.env.ACCESS_TOKEN_SECRET as string,
+    process.env.ACCESS_TOKEN_SECRET!,
     (error: any, user: any) => {
       if (error) {
         return res.status(403).json({ msg: "invalid token" });

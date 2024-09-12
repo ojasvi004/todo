@@ -66,7 +66,7 @@ export const login = asyncHandler(
 
     const accessToken = jwt.sign(
       payload,
-      process.env.ACCESS_TOKEN_SECRET as string,
+      process.env.ACCESS_TOKEN_SECRET!,
       {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
       }
@@ -74,7 +74,7 @@ export const login = asyncHandler(
 
     const refreshToken = jwt.sign(
       payload,
-      process.env.REFRESH_TOKEN_SECRET as string,
+      process.env.REFRESH_TOKEN_SECRET!,
       {
         expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
       }
@@ -102,7 +102,7 @@ export const refreshToken = asyncHandler(
     }
     const token = jwt.verify(
       refresh_token,
-      process.env.REFRESH_TOKEN_SECRET as string
+      process.env.REFRESH_TOKEN_SECRET!
     ) as JwtPayload;
     const user = await User.findOne({ username: token.username });
 
@@ -116,7 +116,7 @@ export const refreshToken = asyncHandler(
 
     const newAccessToken = jwt.sign(
       payload,
-      process.env.ACCESS_TOKEN_SECRET as string,
+      process.env.ACCESS_TOKEN_SECRET!,
       {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
       }
@@ -124,7 +124,7 @@ export const refreshToken = asyncHandler(
 
     const newRefreshToken = jwt.sign(
       payload,
-      process.env.REFRESH_TOKEN_SECRET as string,
+      process.env.REFRESH_TOKEN_SECRET!,
       {
         expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
       }
